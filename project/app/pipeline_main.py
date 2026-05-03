@@ -30,13 +30,13 @@ def main() -> None:
     """執行第一版最小 pipeline。"""
     base_dir = get_base_dir()
     pipeline_config_path = resolve_pipeline_config_path(base_dir)
-    excel_path = base_dir / "data" / "input.xlsx"
-    output_dir = base_dir / "output" / "pipeline_mvp"
 
     pipeline_config = PipelineConfigLoader(
         pipeline_config_path,
         base_dir=base_dir,
     ).load()
+    excel_path = pipeline_config["input_excel_path"]
+    output_dir = pipeline_config["output_dir"]
     raw_rows = read_excel_rows(excel_path)
 
     debug_grid = pipeline_config["render_defaults"].get("debug_grid", False)

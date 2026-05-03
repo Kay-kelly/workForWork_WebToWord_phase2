@@ -219,6 +219,8 @@ class PipelineConfigLoader:
             self.config_path,
             pipeline_config["image_template_mapping"],
         )
+        input_excel_path = self._resolve_project_path(pipeline_config["input_excel_path"])
+        output_dir = self._resolve_project_path(pipeline_config["output_dir"])
         image_template_config = self._load_json(mapping_path)
         self._validate_image_template_config(image_template_config)
 
@@ -232,6 +234,8 @@ class PipelineConfigLoader:
         return {
             "project_id": pipeline_config["project_id"],
             "test_id": pipeline_config["test_id"],
+            "input_excel_path": input_excel_path,
+            "output_dir": output_dir,
             "pipeline_steps": pipeline_config["pipeline"],
             "render_defaults": merged_render_defaults,
             "image_template_config": image_template_config,
@@ -260,11 +264,17 @@ class PipelineConfigLoader:
             "project_id",
             "test_id",
             "image_template_mapping",
+            "input_excel_path",
+            "output_dir",
             "pipeline",
         ]
         for key in required_keys:
             if key not in config_data:
                 raise ValueError(f"pipeline config 缺少必要欄位: {key}")
+
+        for path_key in ("input_excel_path", "output_dir"):
+            if not isinstance(config_data[path_key], str):
+                raise ValueError(f"pipeline config {path_key} must be a string")
 
         pipeline_steps = config_data["pipeline"]
         if not isinstance(pipeline_steps, list) or not pipeline_steps:
@@ -464,6 +474,13 @@ class PipelineConfigLoader:
             return reference_path
 
         return (source_path.parent / reference_path).resolve()
+
+    def _resolve_project_path(self, reference: str) -> Path:
+        reference_path = Path(reference)
+        if reference_path.is_absolute():
+            return reference_path
+
+        return (self.base_dir / reference_path).resolve()
 
     def _is_allowed_named_anchor(self, anchor_ref: str) -> bool:
         """只先驗證目前文件已定義的固定名稱與 inner_n pattern。"""
