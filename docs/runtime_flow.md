@@ -27,6 +27,14 @@ This config owns the minimum runtime contract for the current MVP pipeline:
 
 The active `PipelineConfigLoader` validates only the minimum required fields and currently supports the MVP image steps `generate_image` and `overlay_text`.
 
+## Project/test identity flow
+
+`project_id` and `test_id` currently come from `project/config/pipelines/mvp_image_pipeline.json`. `pipeline_main.py` loads them through `PipelineConfigLoader` and passes them into `normalize_excel_row`.
+
+`normalize_excel_row` uses those values to create `SharedData.project_id` and `SharedData.test_id`. Excel currently owns row-level business payload only; it does not own project/test identity.
+
+In the active MVP flow, `runner`, `generate_image`, and `overlay_text` all start from `SharedData` rather than raw Excel rows. The legacy `main.py` / `renderer.py` path may still use raw row data directly, but that is the legacy flow, not the current MVP flow.
+
 本文依據目前 repo 內的實際程式碼說明執行流程，對應檔案主要為：
 
 - `project/app/main.py`
