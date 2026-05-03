@@ -35,6 +35,27 @@ The active `PipelineConfigLoader` validates only the minimum required fields and
 
 In the active MVP flow, `runner`, `generate_image`, and `overlay_text` all start from `SharedData` rather than raw Excel rows. The legacy `main.py` / `renderer.py` path may still use raw row data directly, but that is the legacy flow, not the current MVP flow.
 
+## Future Project/Test Type split proposal
+
+Phase 2 keeps using the single MVP pipeline config at `project/config/pipelines/mvp_image_pipeline.json`. Do not split Project/Test Type config yet in current MVP phase.
+
+In a future split, Project config may own:
+
+- `project_id`
+- `allowed_test_types`
+- `data_rules` placeholder
+
+Test Type / Pipeline config may own:
+
+- `test_id`
+- input/output path
+- `image_template_mapping`
+- `render_defaults`
+- pipeline steps
+- future word template / word mapping reference
+
+The actual split should wait until the minimum `build_word` contract is clear, so the loader and config paths do not churn before Word output requirements are known.
+
 本文依據目前 repo 內的實際程式碼說明執行流程，對應檔案主要為：
 
 - `project/app/main.py`
