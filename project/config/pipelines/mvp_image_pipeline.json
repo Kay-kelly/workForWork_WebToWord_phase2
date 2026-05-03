@@ -2,6 +2,8 @@
   "project_id": "mvp_project",
   "test_id": "mvp_image_report",
   "image_template_mapping": "../image_templates/cycle_diagram.json",
+  "input_excel_path": "data/input.xlsx",
+  "output_dir": "output/pipeline_mvp",
   "render_defaults": {
     "default_font_path": "assets/fonts/NotoSansTC-Regular.ttf",
     "default_bold_font_path": "assets/fonts/NotoSansTC-Bold.ttf",
