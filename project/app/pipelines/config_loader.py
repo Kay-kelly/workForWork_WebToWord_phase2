@@ -272,15 +272,35 @@ class PipelineConfigLoader:
             if key not in config_data:
                 raise ValueError(f"pipeline config 缺少必要欄位: {key}")
 
-        for path_key in ("input_excel_path", "output_dir"):
-            if not isinstance(config_data[path_key], str):
-                raise ValueError(f"pipeline config {path_key} must be a string")
+        for string_key in (
+            "project_id",
+            "test_id",
+            "input_excel_path",
+            "output_dir",
+            "image_template_mapping",
+        ):
+            if not isinstance(config_data[string_key], str) or not config_data[string_key].strip():
+                raise ValueError(f"pipeline config {string_key} must be a non-empty string")
 
         pipeline_steps = config_data["pipeline"]
         if not isinstance(pipeline_steps, list) or not pipeline_steps:
             raise ValueError("pipeline 必須是非空列表。")
 
-        step_names = [step.get("step") for step in pipeline_steps if isinstance(step, dict)]
+        step_names: list[str] = []
+        for index, step_config in enumerate(pipeline_steps, start=1):
+            if not isinstance(step_config, dict):
+                raise ValueError(f"pipeline step {index} must be a dict")
+
+            step_name = step_config.get("step")
+            if not isinstance(step_name, str) or not step_name.strip():
+                raise ValueError(f"pipeline step {index} step must be a non-empty string")
+
+            step_name = step_name.strip()
+            if step_name not in SUPPORTED_STEPS:
+                raise ValueError(f"unsupported pipeline step: {step_name}")
+
+            step_names.append(step_name)
+
         if step_names != ["generate_image", "overlay_text"]:
             raise ValueError("目前 MVP pipeline 順序必須固定為: generate_image -> overlay_text")
 

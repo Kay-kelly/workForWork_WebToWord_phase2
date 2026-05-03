@@ -13,6 +13,20 @@ pipeline_main.py
 
 `main.py` + `mapping.json` is legacy flow.
 
+## MVP pipeline config contract
+
+`project/config/pipelines/mvp_image_pipeline.json` is the single MVP pipeline config for Phase 2. It is intentionally not split into Project config and Test Type config yet.
+
+This config owns the minimum runtime contract for the current MVP pipeline:
+
+- project/test identity: `project_id`, `test_id`
+- runtime input/output path: `input_excel_path`, `output_dir`
+- image template reference: `image_template_mapping`
+- render defaults: `render_defaults`
+- pipeline steps: `pipeline`
+
+The active `PipelineConfigLoader` validates only the minimum required fields and currently supports the MVP image steps `generate_image` and `overlay_text`.
+
 本文依據目前 repo 內的實際程式碼說明執行流程，對應檔案主要為：
 
 - `project/app/main.py`
