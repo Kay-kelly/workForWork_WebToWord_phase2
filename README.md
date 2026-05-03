@@ -99,7 +99,7 @@ Current entrypoint: `project/app/pipeline_main.py`
 1. Copy sample input:
 
 ```powershell
-cp project/data/sample/demo_input.xlsx project/data/input.xlsx
+Copy-Item project\data\sample\demo_input.xlsx project\data\input.xlsx -Force
 ```
 
 2. Run pipeline:
