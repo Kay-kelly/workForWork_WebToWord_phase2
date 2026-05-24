@@ -61,6 +61,7 @@ def main() -> None:
             global_config=pipeline_config["render_defaults"],
             base_dir=base_dir,
             output_dir=output_dir,
+            word_config=pipeline_config.get("word_template_config"),
             debug_grid=debug_grid,
         )
         print(f"完成 MVP pipeline: {final_output_path}")

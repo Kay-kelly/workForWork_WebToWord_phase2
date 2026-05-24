@@ -2,6 +2,7 @@
   "project_id": "mvp_project",
   "test_id": "mvp_image_report",
   "image_template_mapping": "../image_templates/cycle_diagram.json",
+  "word_template_config": "../word_templates/mvp_word_report.json",
   "input_excel_path": "data/input.xlsx",
   "output_dir": "output/pipeline_mvp",
   "render_defaults": {
@@ -19,7 +20,13 @@
     },
     {
       "step": "overlay_text",
-      "input_artifact_key": "base_image"
+      "input_artifact_key": "base_image",
+      "artifact_key": "final_image"
+    },
+    {
+      "step": "build_word",
+      "input_artifact_key": "final_image",
+      "artifact_key": "word_docx"
     }
   ]
 }

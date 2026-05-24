@@ -1,8 +1,9 @@
 """
-runner.py
+Pipeline runner for the MVP report flow.
 
-第一版 pipeline runner。
-只支援 shared data -> generate_image -> overlay_text。
+Supported orders:
+- generate_image -> overlay_text
+- generate_image -> overlay_text -> build_word
 """
 
 from pathlib import Path
@@ -10,6 +11,7 @@ from pathlib import Path
 from image.generate_image import generate_image
 from image.overlay_text import overlay_text
 from models.shared_data import SharedData
+from word.build_word import build_word
 
 
 def run_pipeline(
@@ -20,15 +22,10 @@ def run_pipeline(
     global_config: dict,
     base_dir: Path,
     output_dir: Path,
+    word_config: dict | None = None,
     debug_grid: bool = False,
 ) -> Path:
-    """
-    依序執行 pipeline step。
-
-    第一版只支援：
-    - generate_image
-    - overlay_text
-    """
+    """Run configured pipeline steps for one SharedData record."""
     artifacts: dict[str, Path] = {}
     final_output_path: Path | None = None
 
@@ -49,9 +46,7 @@ def run_pipeline(
         if step_name == "overlay_text":
             input_artifact_key = step_config.get("input_artifact_key", "base_image")
             if input_artifact_key not in artifacts:
-                raise ValueError(
-                    f"overlay_text 找不到前一步產物: {input_artifact_key}"
-                )
+                raise ValueError(f"overlay_text missing input artifact: {input_artifact_key}")
 
             final_output_path = build_final_output_path(shared_data, output_dir)
             overlay_text(
@@ -63,18 +58,38 @@ def run_pipeline(
                 output_path=final_output_path,
                 debug_grid=debug_grid,
             )
+
+            artifact_key = step_config.get("artifact_key", "final_image")
+            artifacts[artifact_key] = final_output_path
             continue
 
-        raise ValueError(f"目前不支援的 pipeline step: {step_name}")
+        if step_name == "build_word":
+            if word_config is None:
+                raise ValueError("build_word step requires word_template_config.")
+
+            input_artifact_key = step_config.get("input_artifact_key", "final_image")
+            if input_artifact_key not in artifacts:
+                raise ValueError(f"build_word missing input artifact: {input_artifact_key}")
+
+            artifact_key = step_config.get("artifact_key", "word_docx")
+            artifacts[artifact_key] = build_word(
+                shared_data,
+                word_config=word_config,
+                image_path=artifacts[input_artifact_key],
+                base_dir=base_dir,
+            )
+            continue
+
+        raise ValueError(f"Unsupported pipeline step: {step_name}")
 
     if final_output_path is None:
-        raise ValueError("Pipeline 沒有產出最終圖片。")
+        raise ValueError("Pipeline did not produce a final PNG output.")
 
     return final_output_path
 
 
 def build_final_output_path(shared_data: SharedData, output_dir: Path) -> Path:
-    """建立最終輸出檔名。"""
+    """Build the final PNG output path for one record."""
     output_name = shared_data.get_value("output_name")
 
     if output_name is None or str(output_name).strip() == "":

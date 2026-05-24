@@ -1,0 +1,47 @@
+{
+  "title": "Cycle Diagram Report",
+  "output_dir": "output/pipeline_mvp/word",
+  "filename_pattern": "{output_name}.docx",
+  "image": {
+    "caption": "Generated Cycle Diagram",
+    "width_inches": 6.5
+  },
+  "fields": [
+    {
+      "source": "report_date",
+      "label": "Report Date"
+    },
+    {
+      "source": "cycle_count",
+      "label": "Cycle Count"
+    },
+    {
+      "source": "duration_min",
+      "label": "Duration (min)"
+    },
+    {
+      "source": "outer_high_temp",
+      "label": "Outer High Temp"
+    },
+    {
+      "source": "inner_high_temp",
+      "label": "Inner High Temp"
+    },
+    {
+      "source": "inner_low_temp",
+      "label": "Inner Low Temp"
+    },
+    {
+      "source": "outer_low_temp",
+      "label": "Outer Low Temp"
+    },
+    {
+      "source": "baseline_temp",
+      "label": "Baseline Temp"
+    },
+    {
+      "source": "start_label",
+      "label": "Start Label"
+    }
+  ]
+}

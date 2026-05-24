@@ -20,7 +20,7 @@ from pathlib import Path
 from renderer import resolve_path
 
 
-SUPPORTED_STEPS = ("generate_image", "overlay_text")
+SUPPORTED_STEPS = ("generate_image", "overlay_text", "build_word")
 
 
 class LegacyPipelineConfigLoader:
@@ -224,6 +224,16 @@ class PipelineConfigLoader:
         image_template_config = self._load_json(mapping_path)
         self._validate_image_template_config(image_template_config)
 
+        word_template_config = None
+        word_template_config_path = None
+        if pipeline_config.get("word_template_config"):
+            word_template_config_path = self._resolve_config_reference(
+                self.config_path,
+                pipeline_config["word_template_config"],
+            )
+            word_template_config = self._load_json(word_template_config_path)
+            self._validate_word_template_config(word_template_config)
+
         merged_render_defaults = {
             "default_font_size": 24,
             "default_color": "#000000",
@@ -240,6 +250,8 @@ class PipelineConfigLoader:
             "render_defaults": merged_render_defaults,
             "image_template_config": image_template_config,
             "image_template_mapping_path": mapping_path,
+            "word_template_config": word_template_config,
+            "word_template_config_path": word_template_config_path,
         }
 
     def _load_json(self, path: Path) -> dict:
@@ -282,6 +294,12 @@ class PipelineConfigLoader:
             if not isinstance(config_data[string_key], str) or not config_data[string_key].strip():
                 raise ValueError(f"pipeline config {string_key} must be a non-empty string")
 
+        if "word_template_config" in config_data and (
+            not isinstance(config_data["word_template_config"], str)
+            or not config_data["word_template_config"].strip()
+        ):
+            raise ValueError("pipeline config word_template_config must be a non-empty string")
+
         pipeline_steps = config_data["pipeline"]
         if not isinstance(pipeline_steps, list) or not pipeline_steps:
             raise ValueError("pipeline 必須是非空列表。")
@@ -301,17 +319,65 @@ class PipelineConfigLoader:
 
             step_names.append(step_name)
 
-        if step_names != ["generate_image", "overlay_text"]:
-            raise ValueError("目前 MVP pipeline 順序必須固定為: generate_image -> overlay_text")
+        allowed_step_orders = (
+            ["generate_image", "overlay_text"],
+            ["generate_image", "overlay_text", "build_word"],
+        )
+        if step_names not in allowed_step_orders:
+            raise ValueError(
+                "MVP pipeline order must be generate_image -> overlay_text "
+                "or generate_image -> overlay_text -> build_word."
+            )
 
         generate_artifact_key = pipeline_steps[0].get("artifact_key", "base_image")
         overlay_input_key = pipeline_steps[1].get("input_artifact_key", "base_image")
         if generate_artifact_key != overlay_input_key:
             raise ValueError("overlay_text 的 input_artifact_key 必須對應 generate_image 的 artifact_key。")
 
+        if step_names[-1] == "build_word":
+            if "word_template_config" not in config_data:
+                raise ValueError("build_word step requires word_template_config.")
+
+            overlay_artifact_key = pipeline_steps[1].get("artifact_key", "final_image")
+            word_input_key = pipeline_steps[2].get("input_artifact_key", "final_image")
+            if overlay_artifact_key != word_input_key:
+                raise ValueError("build_word input_artifact_key must match overlay_text artifact_key.")
+
         render_defaults = config_data.get("render_defaults", {})
         if render_defaults and not isinstance(render_defaults, dict):
             raise ValueError("render_defaults 必須是物件。")
+
+    def _validate_word_template_config(self, config_data: dict) -> None:
+        """Validate the minimal Word report config."""
+        required_keys = ["title", "output_dir", "filename_pattern", "image", "fields"]
+        for key in required_keys:
+            if key not in config_data:
+                raise ValueError(f"word template config missing required key: {key}")
+
+        for string_key in ("title", "output_dir", "filename_pattern"):
+            if not isinstance(config_data[string_key], str) or not config_data[string_key].strip():
+                raise ValueError(f"word template config {string_key} must be a non-empty string")
+
+        image_config = config_data["image"]
+        if not isinstance(image_config, dict):
+            raise ValueError("word template config image must be a dict")
+
+        if "width_inches" in image_config and float(image_config["width_inches"]) <= 0:
+            raise ValueError("word template config image.width_inches must be greater than 0")
+
+        fields = config_data["fields"]
+        if not isinstance(fields, list):
+            raise ValueError("word template config fields must be a list")
+
+        for index, field in enumerate(fields, start=1):
+            if not isinstance(field, dict):
+                raise ValueError(f"word template config fields[{index}] must be a dict")
+
+            source = field.get("source")
+            if not isinstance(source, str) or not source.strip():
+                raise ValueError(
+                    f"word template config fields[{index}].source must be a non-empty string"
+                )
 
     def _validate_image_template_config(self, config_data: dict) -> None:
         """驗證目前穩定版使用的 cycle_diagram template config。"""
