@@ -1,5 +1,63 @@
 # Runtime Flow
 
+## Current Phase 3 MVP Flow
+
+Current active flow:
+
+```text
+Excel
+-> SharedData
+-> generate_image
+-> overlay_text
+-> build_word
+-> PNG + DOCX output
+```
+
+The active entrypoint is `project/app/pipeline_main.py`.
+`project/app/main.py` + `project/config/mapping.json` is legacy flow.
+
+Smoke test commands:
+
+```powershell
+.\.venv\Scripts\python.exe project\app\pipeline_main.py
+.\.venv\Scripts\python.exe project\app\word\inspect_word.py
+```
+
+Current sample outputs:
+
+```text
+project/output/pipeline_mvp/report_cycle_2.png
+project/output/pipeline_mvp/report_cycle_3.png
+project/output/pipeline_mvp/report_cycle_5.png
+project/output/pipeline_mvp/word/report_cycle_2.docx
+project/output/pipeline_mvp/word/report_cycle_3.docx
+project/output/pipeline_mvp/word/report_cycle_5.docx
+```
+
+`project/output/` is ignored by git and should not be committed.
+
+## Current Word MVP Scope
+
+The current Word MVP supports:
+
+- `template_path` for loading `project/templates/word/mvp_report_template.docx`
+- paragraph placeholder replacement
+- table-cell placeholder replacement
+- `{{cycle_image}}` replacement with the final PNG from `overlay_text`
+- direct DOCX fallback when no `template_path` is configured
+- structural inspection through `project/app/word/inspect_word.py`
+
+Known limitations:
+
+- no header/footer placeholders
+- no text-box placeholders
+- no cross-run placeholder replacement
+- no complex multi-image layout
+- no visual Word render validation
+- no complete production report template
+
+The older sections below are retained as historical notes for the legacy image-only flow and earlier Phase 2 planning.
+
 ## Current Flow（MVP）
 
 Current MVP pipeline:
