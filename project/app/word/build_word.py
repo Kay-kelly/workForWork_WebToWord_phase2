@@ -38,6 +38,52 @@ def build_word(
     output_path = build_output_path(shared_data, word_config, base_dir)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    if word_config.get("template_path"):
+        document = build_document_from_template(
+            shared_data,
+            word_config=word_config,
+            image_path=image_path,
+            base_dir=base_dir,
+        )
+    else:
+        document = build_document_from_scratch(
+            shared_data,
+            word_config=word_config,
+            image_path=image_path,
+            base_dir=base_dir,
+        )
+
+    document.save(output_path)
+    return output_path
+
+
+def build_document_from_template(
+    shared_data: SharedData,
+    *,
+    word_config: dict,
+    image_path: Path,
+    base_dir: Path,
+) -> Document:
+    """Build a DOCX by replacing placeholders in a configured template."""
+    template_path = resolve_project_path(base_dir, str(word_config["template_path"]))
+    if not template_path.exists():
+        raise FileNotFoundError(f"word template not found: {template_path}")
+
+    document = Document(template_path)
+    replacements = build_placeholder_replacements(shared_data, word_config)
+    replace_text_placeholders(document, replacements)
+    replace_image_placeholders(document, image_path, word_config)
+    return document
+
+
+def build_document_from_scratch(
+    shared_data: SharedData,
+    *,
+    word_config: dict,
+    image_path: Path,
+    base_dir: Path,
+) -> Document:
+    """Build the original MVP DOCX without a template."""
     document = Document()
     configure_document(document)
 
@@ -45,9 +91,7 @@ def build_word(
     add_metadata_table(document, shared_data)
     add_payload_table(document, shared_data, word_config)
     add_image(document, image_path, word_config)
-
-    document.save(output_path)
-    return output_path
+    return document
 
 
 def configure_document(document: Document) -> None:
@@ -137,6 +181,135 @@ def add_image(document: Document, image_path: Path, word_config: dict) -> None:
     image_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = image_paragraph.add_run()
     run.add_picture(str(image_path), width=Inches(width_inches))
+
+
+def build_placeholder_replacements(
+    shared_data: SharedData,
+    word_config: dict,
+) -> dict[str, str]:
+    placeholders = word_config.get("placeholders", {})
+    if not isinstance(placeholders, dict):
+        return {}
+
+    replacements: dict[str, str] = {}
+    for placeholder, rule in placeholders.items():
+        if not isinstance(rule, dict):
+            continue
+
+        replacements[str(placeholder)] = resolve_placeholder_value(
+            shared_data,
+            word_config,
+            rule,
+        )
+
+    return replacements
+
+
+def resolve_placeholder_value(
+    shared_data: SharedData,
+    word_config: dict,
+    rule: dict,
+) -> str:
+    if "value" in rule:
+        return "" if rule["value"] is None else str(rule["value"])
+
+    source = str(rule.get("source", "")).strip()
+    if not source:
+        return ""
+
+    built_in_values = {
+        "record_id": shared_data.record_id,
+        "project_id": shared_data.project_id,
+        "test_id": shared_data.test_id,
+        "batch_sequence_id": shared_data.batch_sequence_id,
+        "title": word_config.get("title", ""),
+    }
+    if source in built_in_values:
+        value = built_in_values[source]
+    else:
+        value = shared_data.get_value(source)
+
+    return "" if value is None else str(value)
+
+
+def replace_text_placeholders(document: Document, replacements: dict[str, str]) -> None:
+    if not replacements:
+        return
+
+    for paragraph in iter_paragraphs(document):
+        text = paragraph.text
+        replaced_text = text
+        for placeholder, value in replacements.items():
+            replaced_text = replaced_text.replace(placeholder, value)
+
+        if replaced_text != text:
+            set_paragraph_text(paragraph, replaced_text)
+
+
+def replace_image_placeholders(
+    document: Document,
+    image_path: Path,
+    word_config: dict,
+) -> None:
+    image_placeholders = word_config.get("image_placeholders", {})
+    if not isinstance(image_placeholders, dict):
+        return
+
+    fallback_image_config = word_config.get("image", {})
+    fallback_width = 6.5
+    if isinstance(fallback_image_config, dict):
+        fallback_width = float(fallback_image_config.get("width_inches", fallback_width))
+
+    for paragraph in iter_paragraphs(document):
+        for placeholder, rule in image_placeholders.items():
+            placeholder_text = str(placeholder)
+            if placeholder_text not in paragraph.text:
+                continue
+
+            width_inches = fallback_width
+            if isinstance(rule, dict):
+                width_inches = float(rule.get("width_inches", fallback_width))
+
+            replace_paragraph_image_placeholder(
+                paragraph,
+                placeholder_text,
+                image_path,
+                width_inches,
+            )
+
+
+def replace_paragraph_image_placeholder(
+    paragraph,
+    placeholder: str,
+    image_path: Path,
+    width_inches: float,
+) -> None:
+    before, _, after = paragraph.text.partition(placeholder)
+    paragraph.clear()
+    if before:
+        paragraph.add_run(before)
+
+    run = paragraph.add_run()
+    run.add_picture(str(image_path), width=Inches(width_inches))
+
+    if after:
+        paragraph.add_run(after)
+
+
+def set_paragraph_text(paragraph, text: str) -> None:
+    paragraph.clear()
+    paragraph.add_run(text)
+
+
+def iter_paragraphs(document: Document):
+    for paragraph in document.paragraphs:
+        yield paragraph
+
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    yield paragraph
 
 
 def build_output_path(

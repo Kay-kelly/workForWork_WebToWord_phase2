@@ -1,7 +1,33 @@
 {
   "title": "Cycle Diagram Report",
+  "template_path": "templates/word/mvp_report_template.docx",
   "output_dir": "output/pipeline_mvp/word",
   "filename_pattern": "{output_name}.docx",
+  "placeholders": {
+    "{{report_title}}": {
+      "value": "Cycle Diagram Report"
+    },
+    "{{record_id}}": {
+      "source": "record_id"
+    },
+    "{{project_id}}": {
+      "source": "project_id"
+    },
+    "{{test_id}}": {
+      "source": "test_id"
+    },
+    "{{batch_sequence_id}}": {
+      "source": "batch_sequence_id"
+    },
+    "{{cycle_count}}": {
+      "source": "cycle_count"
+    }
+  },
+  "image_placeholders": {
+    "{{cycle_image}}": {
+      "width_inches": 6.5
+    }
+  },
   "image": {
     "caption": "Generated Cycle Diagram",
     "width_inches": 6.5

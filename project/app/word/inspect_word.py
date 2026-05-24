@@ -110,6 +110,9 @@ def inspect_docx(path: Path, required_text: tuple[str, ...]) -> InspectionResult
         if text_fragment not in document_text:
             result.failures.append(f"missing required text: {text_fragment}")
 
+    if "{{" in document_text or "}}" in document_text:
+        result.failures.append("unresolved text placeholder found")
+
     if not has_embedded_image(path):
         result.failures.append("no embedded image found under word/media/")
 

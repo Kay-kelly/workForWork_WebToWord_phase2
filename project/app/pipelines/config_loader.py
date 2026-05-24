@@ -358,6 +358,12 @@ class PipelineConfigLoader:
             if not isinstance(config_data[string_key], str) or not config_data[string_key].strip():
                 raise ValueError(f"word template config {string_key} must be a non-empty string")
 
+        if "template_path" in config_data and (
+            not isinstance(config_data["template_path"], str)
+            or not config_data["template_path"].strip()
+        ):
+            raise ValueError("word template config template_path must be a non-empty string")
+
         image_config = config_data["image"]
         if not isinstance(image_config, dict):
             raise ValueError("word template config image must be a dict")
@@ -377,6 +383,46 @@ class PipelineConfigLoader:
             if not isinstance(source, str) or not source.strip():
                 raise ValueError(
                     f"word template config fields[{index}].source must be a non-empty string"
+                )
+
+        self._validate_word_placeholders(config_data.get("placeholders", {}))
+        self._validate_word_image_placeholders(config_data.get("image_placeholders", {}))
+
+    def _validate_word_placeholders(self, placeholders: dict) -> None:
+        if not isinstance(placeholders, dict):
+            raise ValueError("word template config placeholders must be a dict")
+
+        for placeholder, rule in placeholders.items():
+            if not isinstance(placeholder, str) or not placeholder.strip():
+                raise ValueError("word template config placeholder keys must be non-empty strings")
+
+            if not isinstance(rule, dict):
+                raise ValueError(f"word placeholder rule must be a dict: {placeholder}")
+
+            has_value = "value" in rule
+            has_source = "source" in rule
+            if not has_value and not has_source:
+                raise ValueError(f"word placeholder rule needs value or source: {placeholder}")
+
+            if has_source and (
+                not isinstance(rule["source"], str) or not rule["source"].strip()
+            ):
+                raise ValueError(f"word placeholder source must be a non-empty string: {placeholder}")
+
+    def _validate_word_image_placeholders(self, placeholders: dict) -> None:
+        if not isinstance(placeholders, dict):
+            raise ValueError("word template config image_placeholders must be a dict")
+
+        for placeholder, rule in placeholders.items():
+            if not isinstance(placeholder, str) or not placeholder.strip():
+                raise ValueError("word image placeholder keys must be non-empty strings")
+
+            if not isinstance(rule, dict):
+                raise ValueError(f"word image placeholder rule must be a dict: {placeholder}")
+
+            if "width_inches" in rule and float(rule["width_inches"]) <= 0:
+                raise ValueError(
+                    f"word image placeholder width_inches must be greater than 0: {placeholder}"
                 )
 
     def _validate_image_template_config(self, config_data: dict) -> None:
