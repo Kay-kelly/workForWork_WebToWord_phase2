@@ -49,3 +49,5 @@ Thumbs.db
 # project runtime data
 project/data/input.xlsx
 project/data/runtime/
+# project word template
+project/templates/word/deidentified_report_template_repeat.docx
