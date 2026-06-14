@@ -128,6 +128,7 @@ mapping 中每個 placeholder 建議標示 `required`：
 - `inspect_word.py` 會檢查 DOCX 是否仍包含 `{{` 或 `}}`。
 - 若 template 中保留 repeat marker，但目前 renderer 尚未處理，該 template 不應直接用於目前 MVP smoke output。
 - `deidentified_word_report.json` 會列出目前已知 unsupported repeat marker，但不會讓目前 MVP 自動展開 repeat block。
+- `project/app/word/check_word_config.py` 是安全的 dry-run 工具，可檢查 Word config 與本機 template 的 placeholder 對齊狀態；它不產生 Word、不修改 `project/output/`，也不代表 `build_word.py` 已支援 repeat block。
 
 ## 9. 6.3 Environmental Test / Thermal Vacuum Test Repeat Block
 
@@ -170,6 +171,7 @@ Word template 中使用以下 marker 標記動態區塊：
 - `{{cycle_image}}` 圖片插入。
 - 無 `template_path` 時 fallback 直接產生 DOCX。
 - `inspect_word.py` 檢查 DOCX 可開啟、必要文字、unresolved placeholder 與 embedded image。
+- `check_word_config.py` 檢查 config JSON、template path、DOCX zip 可讀性、template placeholders、config declarations 與 known unsupported markers。
 
 ## 11. 目前 MVP 尚未支援項目
 
