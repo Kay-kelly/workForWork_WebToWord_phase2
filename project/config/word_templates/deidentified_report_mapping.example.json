@@ -1,0 +1,230 @@
+{
+  "template_id": "deidentified_report_repeat_v1",
+  "description": "Deidentified Word template mapping example. 6.3 Environmental Test includes fixed head rows, a dynamic repeat block, and fixed tail rows.",
+  "template_path": "project/templates/word/deidentified_report_template_repeat.docx",
+  "output_dir": "project/output/pipeline_mvp/word",
+  "placeholder_rules": [
+    {
+      "placeholder": "{{report_title}}",
+      "source": "shared_data.report_title",
+      "required": true
+    },
+    {
+      "placeholder": "{{test_procedure_title}}",
+      "source": "shared_data.test_procedure_title",
+      "required": false
+    },
+    {
+      "placeholder": "{{test_name}}",
+      "source": "shared_data.test_name",
+      "required": true
+    },
+    {
+      "placeholder": "{{requirement_source}}",
+      "source": "shared_data.requirement_source",
+      "required": false
+    },
+    {
+      "placeholder": "{{high_temperature}}",
+      "source": "shared_data.high_temperature",
+      "required": true
+    },
+    {
+      "placeholder": "{{low_temperature}}",
+      "source": "shared_data.low_temperature",
+      "required": true
+    },
+    {
+      "placeholder": "{{pressure_tolerance}}",
+      "source": "shared_data.pressure_tolerance",
+      "required": false
+    },
+    {
+      "placeholder": "{{non_operation_condition}}",
+      "source": "shared_data.non_operation_condition",
+      "required": true
+    },
+    {
+      "placeholder": "{{operation_condition}}",
+      "source": "shared_data.operation_condition",
+      "required": true
+    },
+    {
+      "placeholder": "{{temperature_tolerance}}",
+      "source": "shared_data.temperature_tolerance",
+      "required": false
+    },
+    {
+      "placeholder": "{{cycle_count}}",
+      "source": "shared_data.cycle_count",
+      "required": true
+    }
+  ],
+  "image_rules": [
+    {
+      "placeholder": "{{cycle_image}}",
+      "artifact_key": "cycle_image",
+      "source": "artifacts.images.cycle_profile",
+      "required": true,
+      "width_inches": 5.5,
+      "caption": "Figure 4 Test profile schematic."
+    }
+  ],
+  "table_rules": [
+    {
+      "table_key": "test_conditions",
+      "match_by": "placeholder",
+      "cells": [
+        {
+          "placeholder": "{{non_operation_condition}}",
+          "source": "shared_data.non_operation_condition",
+          "required": true
+        },
+        {
+          "placeholder": "{{operation_condition}}",
+          "source": "shared_data.operation_condition",
+          "required": true
+        },
+        {
+          "placeholder": "{{temperature_tolerance}}",
+          "source": "shared_data.temperature_tolerance",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "repeat_block_rules": [
+    {
+      "section_key": "thermal_vacuum_cycle_block",
+      "section_title": "6.3 Environmental Test",
+      "type": "repeat_table_rows",
+      "status": "future_requirement_not_current_mvp",
+      "repeat_source": "shared_data.thermal_cycles",
+      "fallback_repeat_count_source": "shared_data.cycle_count",
+      "start_marker": "{{#repeat:thermal_vacuum_cycle_block}}",
+      "end_marker": "{{/repeat:thermal_vacuum_cycle_block}}",
+      "fixed_head_policy": "rows before the start_marker are single-instance rows and must not be duplicated",
+      "fixed_tail_policy": "rows after the end_marker are single-instance rows and must not be duplicated",
+      "row_placeholders": [
+        {
+          "placeholder": "{{cycle_index}}",
+          "source": "thermal_cycles[].cycle_index",
+          "required": true
+        },
+        {
+          "placeholder": "{{cycle_label}}",
+          "source": "thermal_cycles[].cycle_label",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_date_time}}",
+          "source": "thermal_cycles[].date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_status}}",
+          "source": "thermal_cycles[].status",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_signature_role}}",
+          "source": "thermal_cycles[].signature_role",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_hot_soak_start_label}}",
+          "source": "thermal_cycles[].hot_soak_start.label",
+          "required": true
+        },
+        {
+          "placeholder": "{{hot_soak_start_time}}",
+          "source": "thermal_cycles[].hot_soak_start.date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_start_status}}",
+          "source": "thermal_cycles[].hot_soak_start.status",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_start_signature}}",
+          "source": "thermal_cycles[].hot_soak_start.signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_hot_soak_end_label}}",
+          "source": "thermal_cycles[].hot_soak_end.label",
+          "required": true
+        },
+        {
+          "placeholder": "{{hot_soak_end_time}}",
+          "source": "thermal_cycles[].hot_soak_end.date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_end_status}}",
+          "source": "thermal_cycles[].hot_soak_end.status",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_end_signature}}",
+          "source": "thermal_cycles[].hot_soak_end.signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_cold_soak_start_label}}",
+          "source": "thermal_cycles[].cold_soak_start.label",
+          "required": true
+        },
+        {
+          "placeholder": "{{cold_soak_start_time}}",
+          "source": "thermal_cycles[].cold_soak_start.date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_start_status}}",
+          "source": "thermal_cycles[].cold_soak_start.status",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_start_signature}}",
+          "source": "thermal_cycles[].cold_soak_start.signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_cold_soak_end_label}}",
+          "source": "thermal_cycles[].cold_soak_end.label",
+          "required": true
+        },
+        {
+          "placeholder": "{{cold_soak_end_time}}",
+          "source": "thermal_cycles[].cold_soak_end.date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_end_status}}",
+          "source": "thermal_cycles[].cold_soak_end.status",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_end_signature}}",
+          "source": "thermal_cycles[].cold_soak_end.signature",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "policies": {
+    "missing_required_placeholder_policy": "error",
+    "missing_optional_placeholder_policy": "leave_blank",
+    "missing_image_policy": "error",
+    "unresolved_placeholder_policy": "error_except_repeat_markers_until_repeat_renderer_exists",
+    "header_footer_placeholder_support": "future_requirement_not_current_mvp",
+    "repeat_table_row_support": "future_requirement_not_current_mvp"
+  },
+  "notes_for_current_mvp": [
+    "Current build_word MVP can handle paragraph/table placeholder replacement and single image insertion.",
+    "Repeat table row rendering is documented here but should not be implemented in the same change unless explicitly requested.",
+    "Markers inside 6.3 are intentionally visible in red to make the repeat block obvious to humans and future code reviewers."
+  ]
+}
