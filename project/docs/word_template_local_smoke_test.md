@@ -118,6 +118,22 @@ Test-Path project\templates\word\deidentified_report_template_repeat.docx
 - 檢查 pipeline 產生後的 output DOCX。
 - 用於確認已生成的 DOCX 可開啟、必要文字存在、沒有 unresolved placeholder，且包含圖片。
 
+`smoke_build_deidentified_word.py`：
+
+- 使用本機 ignored deidentified DOCX template 與 `deidentified_word_report.json`。
+- 呼叫既有 `build_word.py` 產生一份本機 smoke DOCX。
+- 輸出到 ignored artifact：`project/output/pipeline_mvp/word/deidentified_smoke_report.docx`。
+- 用於觀察目前 Word MVP 對新 template 的支援程度，不代表 repeat block renderer 已完成。
+
+建議先跑 dry-run，再跑 smoke build：
+
+```powershell
+.\.venv\Scripts\python.exe project\app\word\check_word_config.py --config project\config\word_templates\deidentified_word_report.json
+.\.venv\Scripts\python.exe project\app\word\smoke_build_deidentified_word.py
+```
+
+若 `project/output/pipeline_mvp/report_cycle_2.png` 不存在，請先跑既有 MVP pipeline 產生圖片，或放置預期的 ignored PNG artifact。
+
 ## 10. 禁止事項
 
 - 不要 commit `project/templates/word/deidentified_report_template_repeat.docx`。
