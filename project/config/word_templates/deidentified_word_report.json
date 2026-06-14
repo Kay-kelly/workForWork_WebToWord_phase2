@@ -1,0 +1,102 @@
+{
+  "title": "Deidentified Thermal Vacuum Test Report",
+  "template_path": "templates/word/deidentified_report_template_repeat.docx",
+  "output_dir": "output/pipeline_mvp/word",
+  "filename_pattern": "{output_name}_deidentified.docx",
+  "description": "Local smoke test config for the deidentified Word template. The DOCX template is intentionally ignored by git and must exist locally at project/templates/word/deidentified_report_template_repeat.docx.",
+  "status": "local_smoke_test_config_not_production",
+  "placeholders": {
+    "{{report_title}}": {
+      "value": "Deidentified Thermal Vacuum Test Report"
+    },
+    "{{record_id}}": {
+      "source": "record_id"
+    },
+    "{{project_id}}": {
+      "source": "project_id"
+    },
+    "{{test_id}}": {
+      "source": "test_id"
+    },
+    "{{batch_sequence_id}}": {
+      "source": "batch_sequence_id"
+    },
+    "{{cycle_count}}": {
+      "source": "cycle_count"
+    },
+    "{{test_procedure_title}}": {
+      "source": "test_procedure_title"
+    },
+    "{{test_name}}": {
+      "source": "test_name"
+    },
+    "{{requirement_source}}": {
+      "source": "requirement_source"
+    },
+    "{{high_temperature}}": {
+      "source": "high_temperature"
+    },
+    "{{low_temperature}}": {
+      "source": "low_temperature"
+    },
+    "{{pressure_tolerance}}": {
+      "source": "pressure_tolerance"
+    },
+    "{{non_operation_condition}}": {
+      "source": "non_operation_condition"
+    },
+    "{{operation_condition}}": {
+      "source": "operation_condition"
+    },
+    "{{temperature_tolerance}}": {
+      "source": "temperature_tolerance"
+    }
+  },
+  "image_placeholders": {
+    "{{cycle_image}}": {
+      "width_inches": 5.5
+    }
+  },
+  "image": {
+    "caption": "Generated Cycle Diagram",
+    "width_inches": 5.5
+  },
+  "fields": [
+    {
+      "source": "cycle_count",
+      "label": "Cycle Count"
+    },
+    {
+      "source": "high_temperature",
+      "label": "High Temperature"
+    },
+    {
+      "source": "low_temperature",
+      "label": "Low Temperature"
+    },
+    {
+      "source": "pressure_tolerance",
+      "label": "Pressure Tolerance"
+    },
+    {
+      "source": "non_operation_condition",
+      "label": "Non-operation Condition"
+    },
+    {
+      "source": "operation_condition",
+      "label": "Operation Condition"
+    },
+    {
+      "source": "temperature_tolerance",
+      "label": "Temperature Tolerance"
+    }
+  ],
+  "known_unsupported": {
+    "repeat_table_row_rendering": {
+      "status": "future_requirement_not_current_mvp",
+      "start_marker": "{{#repeat:thermal_vacuum_cycle_block}}",
+      "end_marker": "{{/repeat:thermal_vacuum_cycle_block}}",
+      "note": "Current build_word MVP can replace normal paragraph/table-cell placeholders and insert {{cycle_image}}, but it does not clone Word table rows between repeat markers."
+    }
+  }
+}

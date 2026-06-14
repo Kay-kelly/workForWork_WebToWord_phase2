@@ -10,6 +10,9 @@
 - runtime output 必須維持在 `project/output/`，且不得 commit。
 - Word template 內所有需要替換的資料應以明確 placeholder 表示，避免用肉眼位置或樣式推斷資料來源。
 - 目前 MVP 的 active Word flow 仍以 `project/config/word_templates/mvp_word_report.json` 為主；`deidentified_report_mapping.example.json` 是 spec/example，不一定可直接由目前 `build_word.py` 執行。
+- `project/config/word_templates/deidentified_word_report.json` 是本機 smoke test config，用來測試目前 `build_word.py` 對去識別化 template 的支援程度。
+- `deidentified_word_report.json` 的 `template_path` 以 `project/` 作為 base dir 解析，因此設定為 `templates/word/deidentified_report_template_repeat.docx`；從 repo root 看到的實體檔位置是 `project/templates/word/deidentified_report_template_repeat.docx`。
+- `project/templates/word/deidentified_report_template_repeat.docx` 不進 repo，開發者需自行放在本機指定路徑；此檔已列入 `.gitignore`。
 
 ## 2. Placeholder 命名規則
 
@@ -124,6 +127,7 @@ mapping 中每個 placeholder 建議標示 `required`：
 
 - `inspect_word.py` 會檢查 DOCX 是否仍包含 `{{` 或 `}}`。
 - 若 template 中保留 repeat marker，但目前 renderer 尚未處理，該 template 不應直接用於目前 MVP smoke output。
+- `deidentified_word_report.json` 會列出目前已知 unsupported repeat marker，但不會讓目前 MVP 自動展開 repeat block。
 
 ## 9. 6.3 Environmental Test / Thermal Vacuum Test Repeat Block
 
@@ -153,6 +157,8 @@ Word template 中使用以下 marker 標記動態區塊：
 本輪明確不實作此功能。
 
 目前 `build_word.py` MVP 尚未支援 repeat-table-row rendering。若把含 repeat marker 的 template 直接接到目前 MVP inspection，可能會因 unresolved placeholder 或 marker 殘留而失敗。
+
+目前 repeat block marker 是 spec marker，不代表 MVP renderer 已支援功能。`deidentified_word_report.json` 僅作為本機 smoke test config，目的是讓開發者確認一般 paragraph/table-cell placeholder 與 `{{cycle_image}}` 插入能力；repeat block 的 head / repeated middle / tail rows 複製仍是 future work。
 
 ## 10. 目前 MVP 已支援項目
 
