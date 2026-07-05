@@ -115,16 +115,20 @@ Test-Path project\templates\word\deidentified_report_template_repeat.docx
 
 `inspect_word.py`：
 
-- 檢查 pipeline 產生後的 output DOCX。
-- 用於確認已生成的 DOCX 可開啟、必要文字存在、沒有 unresolved placeholder，且包含圖片。
+- 檢查 pipeline 產生後的舊 MVP output DOCX。
+- 預設只檢查 `report_cycle_*.docx`。
+- 用於確認正式 MVP report 可開啟、必要文字存在、沒有 unresolved placeholder，且包含圖片。
+- 不應用舊 MVP inspect 規則檢查 `deidentified_smoke_report.docx`。
 
 `smoke_build_deidentified_word.py`：
 
 - 使用本機 ignored deidentified DOCX template 與 `deidentified_word_report.json`。
 - 呼叫既有 `build_word.py` 產生一份本機 smoke DOCX。
 - 輸出到 ignored artifact：`project/output/pipeline_mvp/word/deidentified_smoke_report.docx`。
-- 用於觀察目前 Word MVP 對新 template 的支援程度，不代表 repeat block renderer 已完成。
+- 用於觀察目前 Word MVP 對新 template 的支援程度。
+- `deidentified_smoke_report.docx` 由此 script 驗證，不納入 `inspect_word.py` 的預設 MVP summary。
 - header/footer 內的一般文字 placeholder 已支援；若 `{{report_title}}` 這類 placeholder 仍殘留，應視為 unexpected unresolved，而不是 known unsupported。
+- R1 repeat table row expansion 已支援；smoke build 會檢查 repeat start/end marker 是否已消失，並確認 demo cycle rows 文字已展開。
 
 建議先跑 dry-run，再跑 smoke build：
 
@@ -134,6 +138,14 @@ Test-Path project\templates\word\deidentified_report_template_repeat.docx
 ```
 
 若 `project/output/pipeline_mvp/report_cycle_2.png` 不存在，請先跑既有 MVP pipeline 產生圖片，或放置預期的 ignored PNG artifact。
+
+R1 後 smoke build 的重點判讀：
+
+- `repeat markers resolved: true`。
+- `unresolved repeat markers` 應為 `<none>`。
+- `missing sample repeat text` 應為 `<none>`。
+- `unexpected unresolved placeholders` 應為 `<none>`。
+- 正常情況下 final result 應為 `PASS`。
 
 ## 10. 禁止事項
 

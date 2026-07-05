@@ -2,9 +2,9 @@
 
 ## 1. 文件目的
 
-本文件用來設計未來 `build_word.py` 的 Word repeat block renderer。它描述 repeat block 的資料模型、config 格式、renderer 行為、錯誤處理與驗證策略。
+本文件用來設計 `build_word.py` 的 Word repeat block renderer。它描述 repeat block 的資料模型、config 格式、renderer 行為、錯誤處理與驗證策略。
 
-本文件只是設計文件，不代表本輪已實作 repeat block renderer，也不代表目前 `build_word.py` 已支援 repeat row expansion。
+R1 已實作同一個 Word table 內 start/end marker 之間的 table row repeat expansion。nested repeat、跨 table repeat、text box、repeat block 內圖片與 complex multi-image layout 仍不在目前支援範圍。
 
 ## 2. Repeat Block 的定義
 
@@ -21,7 +21,7 @@ repeat block 是 Word template 中一段可依資料筆數重複產生的區塊�
 {{/repeat:thermal_vacuum_cycle_block}}
 ```
 
-這兩個 marker 中間的 Word table rows 是 repeat row template。未來 renderer 應找到 start marker 所在 row 與 end marker 所在 row，並把兩者之間的 row 當作可複製的 row template。
+這兩個 marker 中間的 Word table rows 是 repeat row template。R1 renderer 會找到 start marker 所在 row 與 end marker 所在 row，並把兩者之間的 row 當作可複製的 row template。
 
 start marker row 與 end marker row 只用於標示範圍，不應出現在最終正式輸出的 DOCX 中。
 
@@ -57,7 +57,7 @@ shared_data.thermal_cycles
 
 實際資料結構可以是 flat object，也可以在後續版本演進成巢狀結構，例如 `hot_soak_start.date_time`、`hot_soak_start.status`、`hot_soak_start.signature`。R1 實作應先選定最小可用格式，避免同時導入過多 mapping 分支。
 
-如果沒有 `thermal_cycles`，才考慮用 `cycle_count` 產生最小 demo rows。這個 fallback 只能用於 local smoke 或 MVP demo，不應默默產出正式報告資料；正式流程缺少 cycle 明細時應預設 FAIL。
+R1 需要 `repeat_source` 指向 list。若沒有 `thermal_cycles`，目前會 FAIL，避免產出錯誤報告。未來才考慮用 `cycle_count` 產生最小 demo rows；這個 fallback 只能用於 local smoke 或 MVP demo，不應默默產出正式報告資料。
 
 ## 6. JSON Config 設計
 
@@ -198,11 +198,15 @@ repeat expansion 完成後，複製出的 rows 已經帶有每筆 cycle data 的
 
 Phase R1：
 
-- 只支援 table row repeat。
-- 只支援同一 table 內的 start/end marker。
+- 已支援 table row repeat。
+- 已支援同一 table 內的 start/end marker。
+- 已支援依 `repeat_source` list 複製 start/end 中間的 row template。
+- 已支援複製後依每筆 repeat data 替換 row placeholder。
+- 已支援移除 start/end marker rows，並清理含 marker 的 template instruction paragraph。
 - 不支援 nested repeat。
 - 不支援跨 table repeat。
 - 不支援 text box。
+- 不支援 repeat block 內插圖片。
 
 Phase R2：
 

@@ -61,6 +61,124 @@
     "caption": "Generated Cycle Diagram",
     "width_inches": 5.5
   },
+  "repeat_block_rules": [
+    {
+      "block_key": "thermal_vacuum_cycle_block",
+      "type": "repeat_table_rows",
+      "start_marker": "{{#repeat:thermal_vacuum_cycle_block}}",
+      "end_marker": "{{/repeat:thermal_vacuum_cycle_block}}",
+      "repeat_source": "shared_data.thermal_cycles",
+      "required": true,
+      "missing_data_policy": "fail",
+      "placeholder_rules": [
+        {
+          "placeholder": "{{cycle_index}}",
+          "source": "thermal_cycles[].cycle_index",
+          "required": true
+        },
+        {
+          "placeholder": "{{cycle_label}}",
+          "source": "thermal_cycles[].cycle_label",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_date_time}}",
+          "source": "thermal_cycles[].date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_status}}",
+          "source": "thermal_cycles[].status",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_signature_role}}",
+          "source": "thermal_cycles[].signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_hot_soak_start_label}}",
+          "source": "thermal_cycles[].hot_soak_start_label",
+          "required": true
+        },
+        {
+          "placeholder": "{{hot_soak_start_time}}",
+          "source": "thermal_cycles[].date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_start_status}}",
+          "source": "thermal_cycles[].status",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_start_signature}}",
+          "source": "thermal_cycles[].signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_hot_soak_end_label}}",
+          "source": "thermal_cycles[].hot_soak_end_label",
+          "required": true
+        },
+        {
+          "placeholder": "{{hot_soak_end_time}}",
+          "source": "thermal_cycles[].date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_end_status}}",
+          "source": "thermal_cycles[].status",
+          "required": false
+        },
+        {
+          "placeholder": "{{hot_soak_end_signature}}",
+          "source": "thermal_cycles[].signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_cold_soak_start_label}}",
+          "source": "thermal_cycles[].cold_soak_start_label",
+          "required": true
+        },
+        {
+          "placeholder": "{{cold_soak_start_time}}",
+          "source": "thermal_cycles[].date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_start_status}}",
+          "source": "thermal_cycles[].status",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_start_signature}}",
+          "source": "thermal_cycles[].signature",
+          "required": false
+        },
+        {
+          "placeholder": "{{cycle_cold_soak_end_label}}",
+          "source": "thermal_cycles[].cold_soak_end_label",
+          "required": true
+        },
+        {
+          "placeholder": "{{cold_soak_end_time}}",
+          "source": "thermal_cycles[].date_time",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_end_status}}",
+          "source": "thermal_cycles[].status",
+          "required": false
+        },
+        {
+          "placeholder": "{{cold_soak_end_signature}}",
+          "source": "thermal_cycles[].signature",
+          "required": false
+        }
+      ]
+    }
+  ],
   "fields": [
     {
       "source": "cycle_count",
@@ -90,13 +208,5 @@
       "source": "temperature_tolerance",
       "label": "Temperature Tolerance"
     }
-  ],
-  "known_unsupported": {
-    "repeat_table_row_rendering": {
-      "status": "future_requirement_not_current_mvp",
-      "start_marker": "{{#repeat:thermal_vacuum_cycle_block}}",
-      "end_marker": "{{/repeat:thermal_vacuum_cycle_block}}",
-      "note": "Current build_word MVP can replace normal paragraph/table-cell placeholders and insert {{cycle_image}}, but it does not clone Word table rows between repeat markers."
-    }
-  }
+  ]
 }

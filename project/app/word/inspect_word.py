@@ -17,6 +17,7 @@ from docx import Document
 
 
 DEFAULT_OUTPUT_DIR = Path(__file__).resolve().parents[2] / "output" / "pipeline_mvp" / "word"
+DEFAULT_DOCX_PATTERN = "report_cycle_*.docx"
 DEFAULT_REQUIRED_TEXT = (
     "Cycle Diagram Report",
     "record_id",
@@ -42,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
     output_dir = Path(args.output_dir)
     required_text = tuple(args.required_text or DEFAULT_REQUIRED_TEXT)
 
-    results = inspect_output_dir(output_dir, required_text)
+    results = inspect_output_dir(output_dir, required_text, args.docx_pattern)
     print_results(results)
 
     return 0 if results and all(result.passed for result in results) else 1
@@ -58,6 +59,14 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
         help="Directory containing generated .docx files.",
     )
     parser.add_argument(
+        "--docx-pattern",
+        default=DEFAULT_DOCX_PATTERN,
+        help=(
+            "Glob pattern for DOCX files to inspect. Defaults to the formal "
+            "MVP report_cycle_*.docx outputs."
+        ),
+    )
+    parser.add_argument(
         "--required-text",
         action="append",
         help=(
@@ -71,6 +80,7 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
 def inspect_output_dir(
     output_dir: Path,
     required_text: tuple[str, ...],
+    docx_pattern: str,
 ) -> list[InspectionResult]:
     if not output_dir.exists():
         return [
@@ -80,12 +90,14 @@ def inspect_output_dir(
             )
         ]
 
-    docx_paths = sorted(output_dir.glob("*.docx"))
+    docx_paths = sorted(output_dir.glob(docx_pattern))
     if not docx_paths:
         return [
             InspectionResult(
                 path=output_dir,
-                failures=[f"no .docx files found in: {output_dir}"],
+                failures=[
+                    f"no .docx files matching {docx_pattern!r} found in: {output_dir}"
+                ],
             )
         ]
 

@@ -67,7 +67,7 @@ table cell placeholder 指出現在 Word 表格儲存格中的 placeholder。
 限制：
 
 - 目前支援的是「儲存格內 placeholder replacement」，不是完整 table mapping engine。
-- 目前尚未支援依 config 指定表格座標、動態新增列、條件式表格內容或 repeat table row rendering。
+- 目前尚未支援依 config 指定表格座標、任意動態新增列或條件式表格內容；repeat table row rendering 目前僅支援 R1 同一 table 內 start/end marker 範圍。
 - 若表格內容需要依 cycle data 重複多列，應使用本文件第 9 節的 repeat block 規格描述，待 future renderer 實作。
 
 ## 5. Image placeholder 規則
@@ -157,11 +157,11 @@ Word template 中使用以下 marker 標記動態區塊：
 - repeat block 內的 rows 應作為 row template，未來依每筆 cycle data 複製。
 - 每次複製後，應以該筆 cycle data 替換 block 內的 placeholder，例如 `{{cycle_index}}`、`{{hot_soak_start_time}}`、`{{cold_soak_end_status}}`。
 
-本輪明確不實作此功能。
+R1 已實作同一 Word table 內 start/end marker 之間的 repeat table row expansion。
 
-目前 `build_word.py` MVP 尚未支援 repeat-table-row rendering。若把含 repeat marker 的 template 直接接到目前 MVP inspection，可能會因 unresolved placeholder 或 marker 殘留而失敗。
+目前 `build_word.py` MVP 支援 R1 repeat-table-row rendering：start/end marker 必須在同一個 Word table，marker 中間的 rows 會依 `repeat_source` list 複製，並以每筆 cycle data 替換 row placeholder。
 
-目前 repeat block marker 是 spec marker，不代表 MVP renderer 已支援功能。`deidentified_word_report.json` 僅作為本機 smoke test config，目的是讓開發者確認一般 paragraph/table-cell placeholder 與 `{{cycle_image}}` 插入能力；repeat block 的 head / repeated middle / tail rows 複製仍是 future work。
+目前 repeat block marker 是 R1 renderer 的範圍標記。`deidentified_word_report.json` 仍作為本機 smoke test config，目的是讓開發者確認一般 paragraph/table-cell/header/footer placeholder、R1 repeat table rows 與 `{{cycle_image}}` 插入能力。
 
 ## 10. 目前 MVP 已支援項目
 
@@ -171,6 +171,7 @@ Word template 中使用以下 marker 標記動態區塊：
 - paragraph placeholder replacement。
 - table cell placeholder replacement。
 - header/footer 一般文字 placeholder replacement。
+- R1 repeat table row expansion。
 - `{{cycle_image}}` 圖片插入。
 - 無 `template_path` 時 fallback 直接產生 DOCX。
 - `inspect_word.py` 檢查 DOCX 可開啟、必要文字、unresolved placeholder 與 embedded image。
@@ -183,16 +184,16 @@ Word template 中使用以下 marker 標記動態區塊：
 - 真實工作用 Word template 正式導入。
 - 完整 placeholder mapping spec 驗證器。
 - table mapping / table write-value engine。
-- repeat table row rendering。
+- nested repeat / cross-table repeat。
 - 多圖插入 MVP。
 - 文字框 placeholder。
 - 跨 run placeholder 的完整樣式保留。
 - 視覺 render validation。
 - 正式報告排版驗收。
 
-## 12. Future build_word repeat table rows 處理建議
+## 12. Future build_word repeat table rows 擴充建議
 
-未來 `build_word` 若要支援 repeat table rows，建議流程如下：
+未來 `build_word` 若要擴充 repeat table rows，建議流程如下：
 
 1. 讀取 mapping 中的 `repeat_block_rules`。
 2. 在 Word table 中尋找 `start_marker` 與 `end_marker`。

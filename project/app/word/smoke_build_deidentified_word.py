@@ -1,10 +1,9 @@
 """
 Local smoke build for the deidentified Word template.
 
-This script intentionally avoids the main pipeline and does not implement
-repeat-block rendering. It writes one ignored DOCX artifact under project/output/
-so developers can see how far the current build_word MVP gets with the
-deidentified template.
+This script intentionally avoids the main pipeline. It writes one ignored DOCX
+artifact under project/output/ so developers can see how far the current
+build_word MVP gets with the deidentified template.
 """
 
 from __future__ import annotations
@@ -30,6 +29,10 @@ PLACEHOLDER_PATTERN = re.compile(
     r"\{\{(?:[#/]?repeat:[A-Za-z0-9_]+|[A-Za-z0-9_]+)\}\}"
 )
 REPEAT_START_PATTERN = re.compile(r"\{\{#repeat:[A-Za-z0-9_]+\}\}")
+THERMAL_VACUUM_REPEAT_MARKERS = {
+    "{{#repeat:thermal_vacuum_cycle_block}}",
+    "{{/repeat:thermal_vacuum_cycle_block}}",
+}
 
 
 def main() -> int:
@@ -80,6 +83,32 @@ def main() -> int:
             "non_operation_condition": "Non-operating thermal vacuum condition",
             "operation_condition": "Operating thermal vacuum condition",
             "temperature_tolerance": "+/- 3 C",
+            "thermal_cycles": [
+                {
+                    "cycle_index": "1",
+                    "cycle_label": "1st thermal vacuum cycle",
+                    "hot_soak_start_label": "1st hot soak start",
+                    "hot_soak_end_label": "1st hot soak end",
+                    "cold_soak_start_label": "1st cold soak start",
+                    "cold_soak_end_label": "1st cold soak end",
+                    "function_test_label": "1st functional test",
+                    "date_time": "",
+                    "status": "□ OK / □ NG",
+                    "signature": "Responsible Engineer",
+                },
+                {
+                    "cycle_index": "2",
+                    "cycle_label": "2nd thermal vacuum cycle",
+                    "hot_soak_start_label": "2nd hot soak start",
+                    "hot_soak_end_label": "2nd hot soak end",
+                    "cold_soak_start_label": "2nd cold soak start",
+                    "cold_soak_end_label": "2nd cold soak end",
+                    "function_test_label": "2nd functional test",
+                    "date_time": "",
+                    "status": "□ OK / □ NG",
+                    "signature": "Responsible Engineer",
+                },
+            ],
         },
         source_info={
             "source_type": "smoke_build_deidentified_word",
@@ -110,14 +139,35 @@ def main() -> int:
         structurally_unsupported,
     )
     unexpected_unresolved = unresolved - known_unsupported
+    unresolved_repeat_markers = unresolved & THERMAL_VACUUM_REPEAT_MARKERS
+    missing_repeat_text = collect_missing_text(
+        output_path,
+        {
+            "1st hot soak start",
+            "1st cold soak end",
+            "2nd hot soak start",
+            "2nd cold soak end",
+        },
+    )
 
     print(f"output docx path: {output_path}")
     print(f"template path: {TEMPLATE_PATH}")
     print(f"unresolved placeholders count: {len(unresolved)}")
     print(f"known unsupported markers count: {len(known_unsupported & unresolved)}")
+    print(f"repeat markers resolved: {str(not unresolved_repeat_markers).lower()}")
     print_list("unresolved placeholders", unresolved)
     print_list("known unsupported unresolved", known_unsupported & unresolved)
+    print_list("unresolved repeat markers", unresolved_repeat_markers)
+    print_list("missing sample repeat text", missing_repeat_text)
     print_list("unexpected unresolved placeholders", unexpected_unresolved)
+
+    if unresolved_repeat_markers:
+        print("final result: FAIL")
+        return 1
+
+    if missing_repeat_text:
+        print("final result: FAIL")
+        return 1
 
     if unexpected_unresolved:
         print("final result: FAIL")
@@ -172,6 +222,23 @@ def collect_unresolved_placeholders(docx_path: Path) -> tuple[set[str], set[str]
             structurally_unsupported.update(collect_text_box_placeholders(xml_text))
 
     return unresolved, structurally_unsupported
+
+
+def collect_missing_text(docx_path: Path, expected_text: set[str]) -> set[str]:
+    if not zipfile.is_zipfile(docx_path):
+        return set(expected_text)
+
+    texts: list[str] = []
+    with zipfile.ZipFile(docx_path) as docx_zip:
+        for name in docx_zip.namelist():
+            if not name.startswith("word/") or not name.endswith(".xml"):
+                continue
+
+            xml_text = docx_zip.read(name).decode("utf-8", errors="replace")
+            texts.append(xml_to_text(xml_text))
+
+    docx_text = "\n".join(texts)
+    return {text for text in expected_text if text not in docx_text}
 
 
 def xml_to_text(xml_text: str) -> str:

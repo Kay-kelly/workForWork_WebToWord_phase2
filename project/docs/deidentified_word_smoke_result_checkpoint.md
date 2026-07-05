@@ -36,36 +36,33 @@
 目前結果：
 
 - `check_word_config.py`: `PASS`
-- `smoke_build_deidentified_word.py`: `WARN`
+- `smoke_build_deidentified_word.py`: `PASS`
 - output DOCX path: `project/output/pipeline_mvp/word/deidentified_smoke_report.docx`
-- unresolved placeholders count: `23`
-- known unsupported count: `23`
+- unresolved placeholders count: `0`
+- known unsupported count: `0`
+- repeat markers resolved: true
 - unexpected unresolved placeholders: none
 
 `project/output/` 是 ignored artifact，不可 commit。
 
 ## 5. WARN 判讀
 
-目前 `WARN` 是可接受狀態。
+R1 後目前 smoke build 預期為 `PASS`。
 
-原因是所有 unresolved placeholders 都屬於 known unsupported，沒有 unexpected unresolved placeholder。換句話說，目前輸出仍留下的 placeholder 都落在本階段明確尚未支援的 Word 結構或 repeat block 範圍內，不是既有 MVP 支援能力的 regression。
+原因是 repeat table row expansion 已支援 6.3 thermal vacuum cycle block，output DOCX 不應再殘留 repeat start/end marker 或 repeat block 內的 cycle placeholders。
 
-後續若出現 unexpected unresolved placeholder，才應視為需要調查或修正的問題。
+後續若出現 unresolved placeholder 或 repeat marker 殘留，應視為需要調查或修正的問題。
 
 ## 6. Known Unsupported 範圍
 
-目前 known unsupported 包含：
+目前 known unsupported 不包含 R1 repeat table row block。
 
-- repeat block marker:
-  - `{{#repeat:thermal_vacuum_cycle_block}}`
-  - `{{/repeat:thermal_vacuum_cycle_block}}`
-- repeat block 內的 cycle placeholders。
+尚未支援的範圍仍包含：
+
 - text box placeholder，如果 template 中有。
 - complex multi-image layout。
 
-這些項目目前只被辨識與分類，不代表已被 renderer 支援。
-
-此輪後，header/footer 內的一般文字 placeholder replacement 已支援。header/footer 中的 `{{report_title}}` 預期不再殘留，也不再列為 known unsupported；WARN 數量可能因此下降。repeat block unresolved 仍是 known unsupported。
+R1 後，header/footer 內的一般文字 placeholder replacement 已支援，6.3 thermal vacuum repeat table row expansion 也已支援。repeat start/end marker 與 repeat block 內 sample cycle placeholders 預期不再殘留。
 
 ## 7. 目前已驗證成功的範圍
 
@@ -76,6 +73,8 @@
 - DOCX 可讀。
 - smoke script 可呼叫既有 `build_word` 邏輯。
 - output DOCX 可成功產生。
+- repeat marker 已消失。
+- demo thermal cycle rows 已展開。
 - unexpected unresolved placeholders 為 `0`。
 
 ## 8. 尚未代表完成的範圍
@@ -83,7 +82,7 @@
 目前結果不代表：
 
 - 正式 Word 報告完成。
-- repeat block renderer 已完成。
+- nested repeat / cross-table repeat 已完成。
 - 正式排版驗收已完成。
 - 多圖複雜排版已完成。
 
@@ -91,13 +90,13 @@
 
 ## 9. 下一步建議
 
-下一步仍不建議直接實作 repeat block renderer。
+下一步仍不建議擴大到 complex multi-image layout 或正式排版驗收。
 
 建議優先順序：
 
 1. 先檢查 smoke output DOCX 的人工版面可讀性。
-2. repeat block renderer 之後獨立 phase 實作。
-3. complex multi-image layout 不要和 repeat block 混在同一輪做。
+2. 若需要，補 R2 diagnostics / missing data policy。
+3. complex multi-image layout 不要和 R2/R3 repeat block 混在同一輪做。
 
 ## 10. 禁止事項
 

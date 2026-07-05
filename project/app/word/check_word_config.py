@@ -284,9 +284,7 @@ def collect_repeat_rule_markers(value: Any) -> set[str]:
 
 
 def collect_known_unsupported_placeholders(config_data: dict[str, Any]) -> set[str]:
-    known = extract_marker_values(config_data.get("known_unsupported"))
-    known.update(collect_repeat_rule_markers(config_data.get("repeat_block_rules")))
-    return known
+    return extract_marker_values(config_data.get("known_unsupported"))
 
 
 def extract_marker_values(value: Any) -> set[str]:
