@@ -124,6 +124,7 @@ Test-Path project\templates\word\deidentified_report_template_repeat.docx
 - 呼叫既有 `build_word.py` 產生一份本機 smoke DOCX。
 - 輸出到 ignored artifact：`project/output/pipeline_mvp/word/deidentified_smoke_report.docx`。
 - 用於觀察目前 Word MVP 對新 template 的支援程度，不代表 repeat block renderer 已完成。
+- header/footer 內的一般文字 placeholder 已支援；若 `{{report_title}}` 這類 placeholder 仍殘留，應視為 unexpected unresolved，而不是 known unsupported。
 
 建議先跑 dry-run，再跑 smoke build：
 

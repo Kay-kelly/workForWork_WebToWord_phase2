@@ -44,6 +44,7 @@ paragraph placeholder 指出現在一般段落文字中的 placeholder。
 目前 MVP 已支援：
 
 - 在 document paragraphs 中搜尋 placeholder。
+- 在 header/footer paragraphs 中搜尋一般文字 placeholder。
 - 依 config 將 placeholder 替換成 `SharedData` 或固定值。
 - 未設定資料時可依 mapping policy 決定 error 或留空。
 
@@ -51,7 +52,7 @@ paragraph placeholder 指出現在一般段落文字中的 placeholder。
 
 - 目前 MVP 以 paragraph 的合併文字進行替換，替換後會重建該 paragraph 的文字 run。
 - 若 placeholder 被 Word 拆成多個 run，複雜樣式可能無法完整保留。
-- header、footer、文字框內的 placeholder 目前不是 MVP 支援範圍。
+- 文字框內的 placeholder 目前不是 MVP 支援範圍。
 
 ## 4. Table cell placeholder 規則
 
@@ -61,6 +62,7 @@ table cell placeholder 指出現在 Word 表格儲存格中的 placeholder。
 
 - 掃描 Word table cell 裡的 paragraphs。
 - 替換 table cell 內的文字 placeholder。
+- 掃描 header/footer 內 table cell 裡的 paragraphs，並替換一般文字 placeholder。
 
 限制：
 
@@ -168,6 +170,7 @@ Word template 中使用以下 marker 標記動態區塊：
 - `template_path` 讀取 `.docx` template。
 - paragraph placeholder replacement。
 - table cell placeholder replacement。
+- header/footer 一般文字 placeholder replacement。
 - `{{cycle_image}}` 圖片插入。
 - 無 `template_path` 時 fallback 直接產生 DOCX。
 - `inspect_word.py` 檢查 DOCX 可開啟、必要文字、unresolved placeholder 與 embedded image。
@@ -182,7 +185,6 @@ Word template 中使用以下 marker 標記動態區塊：
 - table mapping / table write-value engine。
 - repeat table row rendering。
 - 多圖插入 MVP。
-- header / footer placeholder。
 - 文字框 placeholder。
 - 跨 run placeholder 的完整樣式保留。
 - 視覺 render validation。

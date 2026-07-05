@@ -169,8 +169,6 @@ def collect_unresolved_placeholders(docx_path: Path) -> tuple[set[str], set[str]
             placeholders = set(PLACEHOLDER_PATTERN.findall(text))
             unresolved.update(placeholders)
             structurally_unsupported.update(collect_repeat_block_placeholders(text))
-            if is_header_or_footer_xml(name):
-                structurally_unsupported.update(placeholders)
             structurally_unsupported.update(collect_text_box_placeholders(xml_text))
 
     return unresolved, structurally_unsupported
@@ -178,11 +176,6 @@ def collect_unresolved_placeholders(docx_path: Path) -> tuple[set[str], set[str]
 
 def xml_to_text(xml_text: str) -> str:
     return html.unescape(re.sub(r"<[^>]+>", "", xml_text))
-
-
-def is_header_or_footer_xml(name: str) -> bool:
-    path = Path(name)
-    return path.name.startswith(("header", "footer"))
 
 
 def collect_known_unsupported(

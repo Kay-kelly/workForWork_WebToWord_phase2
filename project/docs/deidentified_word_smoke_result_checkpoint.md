@@ -38,8 +38,8 @@
 - `check_word_config.py`: `PASS`
 - `smoke_build_deidentified_word.py`: `WARN`
 - output DOCX path: `project/output/pipeline_mvp/word/deidentified_smoke_report.docx`
-- unresolved placeholders count: `24`
-- known unsupported count: `24`
+- unresolved placeholders count: `23`
+- known unsupported count: `23`
 - unexpected unresolved placeholders: none
 
 `project/output/` 是 ignored artifact，不可 commit。
@@ -60,11 +60,12 @@
   - `{{#repeat:thermal_vacuum_cycle_block}}`
   - `{{/repeat:thermal_vacuum_cycle_block}}`
 - repeat block 內的 cycle placeholders。
-- header/footer placeholder，例如 header 中的 `{{report_title}}`。
 - text box placeholder，如果 template 中有。
 - complex multi-image layout。
 
 這些項目目前只被辨識與分類，不代表已被 renderer 支援。
+
+此輪後，header/footer 內的一般文字 placeholder replacement 已支援。header/footer 中的 `{{report_title}}` 預期不再殘留，也不再列為 known unsupported；WARN 數量可能因此下降。repeat block unresolved 仍是 known unsupported。
 
 ## 7. 目前已驗證成功的範圍
 
@@ -83,7 +84,6 @@
 
 - 正式 Word 報告完成。
 - repeat block renderer 已完成。
-- header/footer replacement 已完成。
 - 正式排版驗收已完成。
 - 多圖複雜排版已完成。
 
@@ -96,9 +96,8 @@
 建議優先順序：
 
 1. 先檢查 smoke output DOCX 的人工版面可讀性。
-2. 再決定是否要先支援 header/footer placeholder。
-3. repeat block renderer 之後獨立 phase 實作。
-4. complex multi-image layout 不要和 repeat block 混在同一輪做。
+2. repeat block renderer 之後獨立 phase 實作。
+3. complex multi-image layout 不要和 repeat block 混在同一輪做。
 
 ## 10. 禁止事項
 

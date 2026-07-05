@@ -236,14 +236,18 @@ def replace_text_placeholders(document: Document, replacements: dict[str, str]) 
     if not replacements:
         return
 
-    for paragraph in iter_paragraphs(document):
-        text = paragraph.text
-        replaced_text = text
-        for placeholder, value in replacements.items():
-            replaced_text = replaced_text.replace(placeholder, value)
+    for paragraph in iter_text_placeholder_paragraphs(document):
+        replace_paragraph_text_placeholders(paragraph, replacements)
 
-        if replaced_text != text:
-            set_paragraph_text(paragraph, replaced_text)
+
+def replace_paragraph_text_placeholders(paragraph, replacements: dict[str, str]) -> None:
+    text = paragraph.text
+    replaced_text = text
+    for placeholder, value in replacements.items():
+        replaced_text = replaced_text.replace(placeholder, value)
+
+    if replaced_text != text:
+        set_paragraph_text(paragraph, replaced_text)
 
 
 def replace_image_placeholders(
@@ -302,10 +306,29 @@ def set_paragraph_text(paragraph, text: str) -> None:
 
 
 def iter_paragraphs(document: Document):
-    for paragraph in document.paragraphs:
+    yield from iter_container_paragraphs(document)
+
+
+def iter_text_placeholder_paragraphs(document: Document):
+    yield from iter_paragraphs(document)
+
+    for section in document.sections:
+        for story_name in (
+            "header",
+            "footer",
+            "first_page_header",
+            "first_page_footer",
+            "even_page_header",
+            "even_page_footer",
+        ):
+            yield from iter_container_paragraphs(getattr(section, story_name))
+
+
+def iter_container_paragraphs(container):
+    for paragraph in container.paragraphs:
         yield paragraph
 
-    for table in document.tables:
+    for table in container.tables:
         for row in table.rows:
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
